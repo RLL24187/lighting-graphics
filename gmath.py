@@ -7,7 +7,7 @@ from display import *
   # Ambient light is represeneted by a color value
 
   # Point light sources are 2D arrays of doubles.
-  #      - The fist index (LOCATION) represents the vector to the light.
+  #      - The first index (LOCATION) represents the vector to the light.
   #      - The second index (COLOR) represents the color.
 
   # Reflection constants (ka, kd, ks) are represened as arrays of
@@ -25,8 +25,10 @@ SPECULAR_EXP = 4
         # e.g. 255, 255, 255 (white)
     # P: The color of a point light source (RGB or a single value [0-255])
         # e.g. 255, 0, 255 (magenta)
+        # light's second index COLOR
     # Vector L: The vector from the surface of an object to a point light source ( <x, y, z> ).
         # e.g. 1, 0.5, 1 (to the right, slightly up and in front)
+        # light's first index LOCATION
     # Vector V: The view vector (from the surface of an object to the viewer) ( <x, y, z> ).
         # e.g. 0, 0, 1 (directly in front)
     # Vector N: The surface normal of a polygon, see notes on backface culling for more on this.
@@ -41,19 +43,47 @@ SPECULAR_EXP = 4
 
 #lighting functions
 def get_lighting(normal, view, ambient, light, areflect, dreflect, sreflect ):
+    Ia = calculate_ambient(ambient, areflect)
+    Id = calculate_diffuse(light, dreflect, normal)
+    Is = calculate_specular(light, sreflect, view, normal)
+    color = [
+        int(Ia[0] + Id[0] + Is[0]),
+        int(Ia[1] + Id[1] + Is[1]),
+        int(Ia[2] + Id[2] + Is[2])]
+
+    limit_color(color)
     return [0, 0, 0]
 
 def calculate_ambient(alight, areflect):
-    pass
+    Ia = [
+        alight[0] * areflect[0],
+        alight[1] * areflect[1],
+        alight[2] * areflect[2]]
+    return Ia
 
 def calculate_diffuse(light, dreflect, normal):
-    pass
+    normalize(normal)
+    normalize(light[LOCATION])
+    prod = dot_product(normal, light[LOCATION])
+    if (prod < 0):
+        prod = 0
+    Id = [
+        light[COLOR][0] * dreflect[0] * prod
+        light[COLOR][1] * dreflect[1] * prod
+        light[COLOR][2] * dreflect[2] * prod]
+    return Id
 
 def calculate_specular(light, sreflect, view, normal):
     pass
 
 def limit_color(color):
-    pass
+    for i in range(3):
+        color[i] = int(color[i])
+        if color[i] > 255: # should be very bright --> max is 255
+            color[i] = 255
+        if color[i] < 0: # should be very dark --> min is 0
+            color[i] = 0
+    return color
 
 #vector functions
 #normalize vetor, should modify the parameter
