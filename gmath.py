@@ -51,7 +51,7 @@ def get_lighting(normal, view, ambient, light, areflect, dreflect, sreflect ):
         int(Ia[1] + Id[1] + Is[1]),
         int(Ia[2] + Id[2] + Is[2])
     ]
-    limit_color(color)
+    # limit_color(color)
     return color
 
 def calculate_ambient(alight, areflect):
@@ -60,7 +60,7 @@ def calculate_ambient(alight, areflect):
         alight[1] * areflect[1],
         alight[2] * areflect[2]
     ]
-    return Ia
+    return limit_color(Ia)
 
 def calculate_diffuse(light, dreflect, normal):
     normalize(normal)
@@ -71,7 +71,7 @@ def calculate_diffuse(light, dreflect, normal):
         light[COLOR][1] * dreflect[1] * prod,
         light[COLOR][2] * dreflect[2] * prod
     ]
-    return Id
+    return limit_color(Id)
 
 def calculate_specular(light, sreflect, view, normal):
     normalize(normal)
@@ -82,13 +82,15 @@ def calculate_specular(light, sreflect, view, normal):
         2 * normal[1] * prod - light[LOCATION][1],
         2 * normal[2] * prod - light[LOCATION][2]
     ]
+    normalize(view)
+    normalize(vecR)
     cosAlpha = dot_product(vecR, view)
     Is = [
         light[COLOR][0] * sreflect[0] * cosAlpha,
         light[COLOR][1] * sreflect[1] * cosAlpha,
         light[COLOR][2] * sreflect[2] * cosAlpha
     ]
-    return Is
+    return limit_color(Is)
 
 def limit_color(color):
     for i in range(3):
