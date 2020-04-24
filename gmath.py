@@ -49,32 +49,46 @@ def get_lighting(normal, view, ambient, light, areflect, dreflect, sreflect ):
     color = [
         int(Ia[0] + Id[0] + Is[0]),
         int(Ia[1] + Id[1] + Is[1]),
-        int(Ia[2] + Id[2] + Is[2])]
-
+        int(Ia[2] + Id[2] + Is[2])
+    ]
     limit_color(color)
-    return [0, 0, 0]
+    return color
 
 def calculate_ambient(alight, areflect):
     Ia = [
         alight[0] * areflect[0],
         alight[1] * areflect[1],
-        alight[2] * areflect[2]]
+        alight[2] * areflect[2]
+    ]
     return Ia
 
 def calculate_diffuse(light, dreflect, normal):
     normalize(normal)
     normalize(light[LOCATION])
     prod = dot_product(normal, light[LOCATION])
-    if (prod < 0):
-        prod = 0
     Id = [
-        light[COLOR][0] * dreflect[0] * prod
-        light[COLOR][1] * dreflect[1] * prod
-        light[COLOR][2] * dreflect[2] * prod]
+        light[COLOR][0] * dreflect[0] * prod,
+        light[COLOR][1] * dreflect[1] * prod,
+        light[COLOR][2] * dreflect[2] * prod
+    ]
     return Id
 
 def calculate_specular(light, sreflect, view, normal):
-    pass
+    normalize(normal)
+    normalize(light[LOCATION])
+    prod = dot_product(normal, light[LOCATION])
+    vecR = [
+        2 * normal[0] * prod - light[LOCATION][0],
+        2 * normal[1] * prod - light[LOCATION][1],
+        2 * normal[2] * prod - light[LOCATION][2]
+    ]
+    cosAlpha = dot_product(vecR, view)
+    Is = [
+        light[COLOR][0] * sreflect[0] * cosAlpha,
+        light[COLOR][1] * sreflect[1] * cosAlpha,
+        light[COLOR][2] * sreflect[2] * cosAlpha
+    ]
+    return Is
 
 def limit_color(color):
     for i in range(3):
@@ -86,7 +100,7 @@ def limit_color(color):
     return color
 
 #vector functions
-#normalize vetor, should modify the parameter
+#normalize vector, should modify the parameter
 def normalize(vector):
     magnitude = math.sqrt( vector[0] * vector[0] +
                            vector[1] * vector[1] +
